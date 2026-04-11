@@ -1,14 +1,13 @@
-const fs = require('fs');
-const path = require('path');
 const request = require('supertest');
 const { app } = require('../src/index');
+const { getDb } = require('../src/data/db');
 
 describe('Questions API', () => {
-  // Reset the question bank to the original 6 before this suite runs
-  beforeAll(() => {
-    const src = path.join(__dirname, '..', 'src', 'data', 'questions.json');
-    const dest = path.join(process.env.DATA_DIR, 'questions.json');
-    fs.copyFileSync(src, dest);
+  // Reset the question bank to the default before this suite runs
+  beforeAll(async () => {
+    const defaultQuestions = require('../src/data/questions.json');
+    const { writeQuestions } = require('../src/data/store');
+    await writeQuestions(defaultQuestions);
   });
 
   test('GET /api/questions returns array of 7 default questions', async () => {

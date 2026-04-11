@@ -1,53 +1,54 @@
-const fs = require('fs');
-const path = require('path');
+const { getDb } = require('./db');
 
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname);
-
-function resolveDataPath(relativePath) {
-  return path.join(DATA_DIR, relativePath);
+async function readQuestions() {
+  const db = await getDb();
+  return db.collection('questions').find({}, { projection: { _id: 0 } }).toArray();
 }
 
-function readJSON(filePath) {
-  const resolved = resolveDataPath(filePath);
-  if (!fs.existsSync(resolved)) return null;
-  return JSON.parse(fs.readFileSync(resolved, 'utf8'));
+async function writeQuestions(questions) {
+  const db = await getDb();
+  await db.collection('questions').deleteMany({});
+  if (questions.length > 0) {
+    await db.collection('questions').insertMany(questions.map(q => ({ ...q })));
+  }
 }
 
-function writeJSON(filePath, data) {
-  const resolved = resolveDataPath(filePath);
-  fs.mkdirSync(path.dirname(resolved), { recursive: true });
-  fs.writeFileSync(resolved, JSON.stringify(data, null, 2), 'utf8');
+async function readSessionIndex() {
+  const db = await getDb();
+  const sessions = await db.collection('sessions')
+    .find({}, { projection: { _id: 0, sessionId: 1, createdAt: 1, className: 1, students: 1 } })
+    .sort({ createdAt: -1 })
+    .toArray();
+  return sessions.map(s => ({
+    sessionId: s.sessionId,
+    createdAt: s.createdAt,
+    className: s.className,
+    studentCount: s.students ? s.students.length : 0
+  }));
 }
 
-function readQuestions() {
-  return readJSON('questions.json') || [];
+async function readSession(pin) {
+  const db = await getDb();
+  const session = await db.collection('sessions').findOne(
+    { sessionId: pin },
+    { projection: { _id: 0 } }
+  );
+  return session || null;
 }
 
-function writeQuestions(questions) {
-  writeJSON('questions.json', questions);
-}
-
-function readSessionIndex() {
-  return readJSON('sessions/_index.json') || [];
-}
-
-function writeSessionIndex(index) {
-  writeJSON('sessions/_index.json', index);
-}
-
-function readSession(pin) {
-  return readJSON(`sessions/${pin}.json`);
-}
-
-function writeSession(pin, session) {
-  writeJSON(`sessions/${pin}.json`, session);
+async function writeSession(pin, session) {
+  const db = await getDb();
+  await db.collection('sessions').replaceOne(
+    { sessionId: pin },
+    session,
+    { upsert: true }
+  );
 }
 
 module.exports = {
   readQuestions,
   writeQuestions,
   readSessionIndex,
-  writeSessionIndex,
   readSession,
   writeSession
 };

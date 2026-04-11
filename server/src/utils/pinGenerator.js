@@ -1,14 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+const { getDb } = require('../data/db');
 
 // Exclude ambiguous characters: 0, O, I, 1
 const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-function generatePin() {
-  const sessionsDir = process.env.DATA_DIR
-    ? path.join(process.env.DATA_DIR, 'sessions')
-    : path.join(__dirname, '..', 'data', 'sessions');
-
+async function generatePin() {
+  const db = await getDb();
   let pin;
   let attempts = 0;
   do {
@@ -17,8 +13,9 @@ function generatePin() {
     ).join('');
     attempts++;
     if (attempts > 100) throw new Error('Could not generate unique PIN');
-  } while (fs.existsSync(path.join(sessionsDir, `${pin}.json`)));
-
+    const existing = await db.collection('sessions').findOne({ sessionId: pin });
+    if (!existing) break;
+  } while (true);
   return pin;
 }
 

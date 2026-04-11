@@ -36,12 +36,9 @@ npm workspaces monorepo with two packages: `server/` and `client/`.
 
 ### Server (`server/src/`)
 
-Express + Socket.io on port 3001. No database — all state lives in JSON files under `server/src/data/`:
-- `questions.json` — global question bank (mutable by teacher)
-- `sessions/{PIN}.json` — one file per quiz session
-- `sessions/_index.json` — lightweight session list for fast listing
+Express + Socket.io on port 3001. All state persists in MongoDB (Atlas in production, local `mongodb://localhost:27017/cs-reflection-quiz` in dev). Two collections: `questions` and `sessions`.
 
-All file I/O goes through `data/store.js` which exposes named helpers (`readQuestions`, `writeSession`, etc.) using synchronous `fs` calls. `DATA_DIR` env var overrides the data directory — used by tests to point at a temp directory.
+`data/db.js` — lazy singleton: `getDb()` auto-connects on first call; `connect()` also creates the `sessionId` unique index. `data/store.js` exposes async helpers (`readQuestions`, `writeSession`, etc.) used by all routes and socket handlers. `data/questions.json` is the seed file — loaded by `index.js` if the `questions` collection is empty on startup.
 
 **Critical invariant:** `POST /api/sessions` snapshots the question bank into `session.questions` at creation time. Subsequent edits to the global bank must never touch existing sessions.
 
@@ -81,10 +78,10 @@ Answer:   { questionId, selectedOptionIndex, confidenceLevel (1-5), explanation 
 
 ### Tests
 
-Server tests use `globalSetup`/`globalTeardown` to create a temp data directory and set `DATA_DIR`. Each test suite that modifies the question bank resets it in `beforeAll` by copying from `server/src/data/questions.json`. Run with `--runInBand` (configured in `server/package.json`) because tests share file state. `index.js` only binds to a port when run as the main module (`require.main === module`), so `require('../src/index')` in tests is safe.
+Server tests use `globalSetup`/`globalTeardown` with `mongodb-memory-server` — `globalSetup` starts an in-memory MongoDB, sets `MONGODB_URI`, and stores the instance in `global.__MONGOD__`; `globalTeardown` stops it. Each test suite that modifies the question bank calls `writeQuestions(require('../src/data/questions.json'))` in `beforeAll` to reset state. Run with `--runInBand --forceExit` (configured in `server/package.json`). `index.js` only binds to a port when run as the main module (`require.main === module`), so `require('../src/index')` in tests is safe.
 
 Client tests mock `../../src/socket` with `vi.mock(...)` to avoid real socket connections. `ResizeObserver` is polyfilled in `tests/setup.js` for Recharts compatibility.
 
 ### Deployment
 
-Deployed to Render (free tier). `render.yaml` at repo root configures build/start commands and `NODE_ENV=production`. **Data is ephemeral** — JSON files are lost on server restart. Teachers should export CSV/JSON at the end of each session. The teacher home shows a warning banner in production (`import.meta.env.PROD`).
+Deployed to Render (free tier). `render.yaml` at repo root configures build/start commands and `NODE_ENV=production`. Requires `MONGODB_URI` env var set in the Render dashboard pointing to a MongoDB Atlas cluster. On startup, if the `questions` collection is empty, `index.js` seeds it from `server/src/data/questions.json`.

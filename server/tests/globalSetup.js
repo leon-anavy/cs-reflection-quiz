@@ -1,14 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 
 module.exports = async function () {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cs-quiz-test-'));
-  fs.mkdirSync(path.join(tmpDir, 'sessions'), { recursive: true });
-
-  const src = path.join(__dirname, '..', 'src', 'data', 'questions.json');
-  fs.copyFileSync(src, path.join(tmpDir, 'questions.json'));
-
-  process.env.DATA_DIR = tmpDir;
-  process.env.__TEST_TMP_DIR__ = tmpDir;
+  const mongod = new MongoMemoryServer();
+  await mongod.start();
+  const uri = mongod.getUri();
+  process.env.MONGODB_URI = uri;
+  process.env.__MONGOD_INSTANCE__ = JSON.stringify({ uri, storageEngine: mongod._instanceInfo?.storageEngine });
+  global.__MONGOD__ = mongod;
 };

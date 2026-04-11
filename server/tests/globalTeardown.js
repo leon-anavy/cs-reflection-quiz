@@ -1,7 +1,8 @@
-const fs = require('fs');
+const { close } = require('../src/data/db');
 
 module.exports = async function () {
-  if (process.env.__TEST_TMP_DIR__) {
-    fs.rmSync(process.env.__TEST_TMP_DIR__, { recursive: true, force: true });
+  await close();
+  if (global.__MONGOD__) {
+    await global.__MONGOD__.stop();
   }
 };

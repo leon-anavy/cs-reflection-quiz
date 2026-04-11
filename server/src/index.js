@@ -3,7 +3,6 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 
 const questionsRouter = require('./routes/questions');
 const sessionsRouter = require('./routes/sessions');
@@ -22,12 +21,6 @@ const io = new Server(httpServer, {
 
 app.use(cors());
 app.use(express.json());
-
-// Ensure sessions directory exists
-const sessionsDir = process.env.DATA_DIR
-  ? path.join(process.env.DATA_DIR, 'sessions')
-  : path.join(__dirname, 'data', 'sessions');
-fs.mkdirSync(sessionsDir, { recursive: true });
 
 // Routes
 app.use('/api/questions', questionsRouter);
@@ -48,9 +41,22 @@ registerHandlers(io);
 
 const PORT = process.env.PORT || 3001;
 if (require.main === module) {
-  httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  const { connect } = require('./data/db');
+  connect()
+    .then(async () => {
+      const { readQuestions, writeQuestions } = require('./data/store');
+      const questions = await readQuestions();
+      if (questions.length === 0) {
+        const defaultQuestions = require('./data/questions.json');
+        await writeQuestions(defaultQuestions);
+        console.log('Seeded default questions');
+      }
+      httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    })
+    .catch(err => {
+      console.error('Failed to connect to MongoDB:', err);
+      process.exit(1);
+    });
 }
 
 module.exports = { app, httpServer, io };
