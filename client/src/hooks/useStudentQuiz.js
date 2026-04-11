@@ -3,18 +3,19 @@ import { getSocket } from '../socket';
 
 export function useStudentQuiz(session, studentId) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState([]);
+  // answers keyed by questionId for easy lookup and update
+  const [answers, setAnswers] = useState({});
   const [finished, setFinished] = useState(false);
 
   const submitAnswer = useCallback((answer) => {
     const socket = getSocket();
-    const newAnswers = [...answers, answer];
-    setAnswers(newAnswers);
+    setAnswers(prev => ({ ...prev, [answer.questionId]: answer }));
 
     socket.emit('student:answer', {
       pin: session.sessionId,
       studentId,
-      answer
+      answer,
+      questionIndex: currentIndex
     });
 
     const nextIndex = currentIndex + 1;
@@ -26,5 +27,14 @@ export function useStudentQuiz(session, studentId) {
     }
   }, [answers, currentIndex, session, studentId]);
 
-  return { currentIndex, answers, finished, submitAnswer };
+  const goBack = useCallback(() => {
+    setCurrentIndex(i => Math.max(0, i - 1));
+  }, []);
+
+  // Return existing answer for a given question (for pre-filling the form)
+  function getAnswer(questionId) {
+    return answers[questionId] || null;
+  }
+
+  return { currentIndex, answers, finished, submitAnswer, goBack, getAnswer };
 }

@@ -36,12 +36,20 @@ export default function HomePage() {
           <h1 className="text-2xl font-black text-gray-900">לוח בקרה — מורה</h1>
           <p className="text-gray-500 text-sm mt-1">ניהול מבדקי השתקפות</p>
         </div>
-        <button
-          onClick={() => navigate('/teacher/questions')}
-          className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-200 transition-colors font-medium"
-        >
-          בנק שאלות
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => navigate('/teacher/preview')}
+            className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+          >
+            תצוגה מקדימה
+          </button>
+          <button
+            onClick={() => navigate('/teacher/questions')}
+            className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+          >
+            בנק שאלות
+          </button>
+        </div>
       </div>
 
       {/* Storage warning (production only) */}

@@ -40,8 +40,8 @@ function registerHandlers(io) {
       io.to(normalizedPin).emit('teacher:roster_update', session.students);
     });
 
-    // Student submits an answer
-    socket.on('student:answer', ({ pin, studentId, answer }) => {
+    // Student submits an answer (handles re-answers when going back)
+    socket.on('student:answer', ({ pin, studentId, answer, questionIndex }) => {
       const normalizedPin = pin.toUpperCase();
       const session = readSession(normalizedPin);
       if (!session) return;
@@ -49,10 +49,19 @@ function registerHandlers(io) {
       const student = session.students.find(s => s.studentId === studentId);
       if (!student) return;
 
-      student.answers.push(answer);
-      student.currentQuestionIndex = Math.min(
-        student.currentQuestionIndex + 1,
-        session.questions.length
+      // Update existing answer or append new one
+      const existingIdx = student.answers.findIndex(a => a.questionId === answer.questionId);
+      if (existingIdx >= 0) {
+        student.answers[existingIdx] = answer;
+      } else {
+        student.answers.push(answer);
+      }
+
+      // currentQuestionIndex tracks the furthest question reached
+      const nextIndex = (questionIndex ?? 0) + 1;
+      student.currentQuestionIndex = Math.max(
+        student.currentQuestionIndex,
+        Math.min(nextIndex, session.questions.length)
       );
 
       writeSession(normalizedPin, session);

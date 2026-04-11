@@ -8,6 +8,7 @@ import HomePage from './pages/teacher/HomePage';
 import LiveMonitor from './pages/teacher/LiveMonitor';
 import Analytics from './pages/teacher/Analytics';
 import QuestionBank from './pages/teacher/QuestionBank';
+import QuizPreview from './pages/teacher/QuizPreview';
 
 // Student pages
 import JoinScreen from './pages/student/JoinScreen';
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/teacher/monitor/:pin" element={<TeacherGuard><LiveMonitor /></TeacherGuard>} />
           <Route path="/teacher/analytics/:pin" element={<TeacherGuard><Analytics /></TeacherGuard>} />
           <Route path="/teacher/questions" element={<TeacherGuard><QuestionBank /></TeacherGuard>} />
+          <Route path="/teacher/preview" element={<TeacherGuard><QuizPreview /></TeacherGuard>} />
 
           {/* Default */}
           <Route path="*" element={<Navigate to="/join" replace />} />

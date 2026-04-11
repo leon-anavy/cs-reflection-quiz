@@ -1,22 +1,34 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const OPTION_LABELS = ['א', 'ב', 'ג', 'ד'];
+
 const EMPTY_QUESTION = {
   id: '',
   title: '',
   codeSnippet: '',
   questionText: '',
   options: ['', '', '', ''],
-  correctAnswerIndex: 0
+  correctAnswerIndex: 0,
+  answerExplanations: ['', '', '', '']
 };
 
 function QuestionForm({ question, onSave, onCancel }) {
-  const [form, setForm] = useState(question);
+  const [form, setForm] = useState({
+    answerExplanations: ['', '', '', ''],
+    ...question
+  });
 
   function setOption(idx, value) {
     const options = [...form.options];
     options[idx] = value;
     setForm(f => ({ ...f, options }));
+  }
+
+  function setExplanation(idx, value) {
+    const answerExplanations = [...(form.answerExplanations || ['', '', '', ''])];
+    answerExplanations[idx] = value;
+    setForm(f => ({ ...f, answerExplanations }));
   }
 
   return (
@@ -41,20 +53,30 @@ function QuestionForm({ question, onSave, onCancel }) {
         value={form.codeSnippet}
         onChange={e => setForm(f => ({ ...f, codeSnippet: e.target.value }))}
       />
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-medium text-gray-600">אפשרויות — סמן את הנכונה ● והוסף הסבר קצר</p>
         {form.options.map((opt, idx) => (
-          <div key={idx} className="flex items-center gap-2">
+          <div key={idx} className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="correct"
+                checked={form.correctAnswerIndex === idx}
+                onChange={() => setForm(f => ({ ...f, correctAnswerIndex: idx }))}
+              />
+              <span className="text-xs font-bold text-gray-500 w-4">{OPTION_LABELS[idx]}</span>
+              <input
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+                placeholder={`אפשרות ${OPTION_LABELS[idx]}`}
+                value={opt}
+                onChange={e => setOption(idx, e.target.value)}
+              />
+            </div>
             <input
-              type="radio"
-              name="correct"
-              checked={form.correctAnswerIndex === idx}
-              onChange={() => setForm(f => ({ ...f, correctAnswerIndex: idx }))}
-            />
-            <input
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
-              placeholder={`אפשרות ${idx + 1}`}
-              value={opt}
-              onChange={e => setOption(idx, e.target.value)}
+              className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-600 me-6"
+              placeholder={`הסבר לאפשרות ${OPTION_LABELS[idx]} (משפט אחד)`}
+              value={(form.answerExplanations || [])[idx] || ''}
+              onChange={e => setExplanation(idx, e.target.value)}
             />
           </div>
         ))}

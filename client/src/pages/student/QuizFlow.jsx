@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useLocation, Navigate } from 'react-router-dom';
 import { useStudentQuiz } from '../../hooks/useStudentQuiz';
 import OptionCard from '../../components/student/OptionCard';
 import ConfidenceSlider from '../../components/student/ConfidenceSlider';
@@ -8,19 +8,31 @@ import CompletionScreen from './CompletionScreen';
 
 export default function QuizFlow() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { session, studentId } = location.state || {};
 
   const [selectedOption, setSelectedOption] = useState(null);
   const [confidence, setConfidence] = useState(null);
   const [explanation, setExplanation] = useState('');
 
-  const { currentIndex, finished, submitAnswer } = useStudentQuiz(session, studentId);
+  const { currentIndex, finished, submitAnswer, goBack, getAnswer } = useStudentQuiz(session, studentId);
 
-  if (!session || !studentId) {
-    return <Navigate to="/join" replace />;
-  }
+  // Pre-fill form when navigating to a question that was already answered
+  useEffect(() => {
+    if (!session) return;
+    const question = session.questions[currentIndex];
+    const existing = getAnswer(question.id);
+    if (existing) {
+      setSelectedOption(existing.selectedOptionIndex);
+      setConfidence(existing.confidenceLevel);
+      setExplanation(existing.explanation);
+    } else {
+      setSelectedOption(null);
+      setConfidence(null);
+      setExplanation('');
+    }
+  }, [currentIndex]);
 
+  if (!session || !studentId) return <Navigate to="/join" replace />;
   if (finished) return <CompletionScreen />;
 
   const question = session.questions[currentIndex];
@@ -38,6 +50,10 @@ export default function QuizFlow() {
     setSelectedOption(null);
     setConfidence(null);
     setExplanation('');
+  }
+
+  function handleBack() {
+    goBack();
   }
 
   return (
@@ -96,15 +112,26 @@ export default function QuizFlow() {
           />
         </div>
 
-        {/* Next / Submit button */}
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={!canProceed}
-          className="w-full bg-blue-600 text-white font-semibold rounded-xl py-4 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors text-lg mb-6"
-        >
-          {isLast ? 'סיום המבדק' : 'שאלה הבאה'}
-        </button>
+        {/* Navigation buttons */}
+        <div className="flex gap-3 mb-6">
+          {currentIndex > 0 && (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex-none bg-gray-100 text-gray-700 font-semibold rounded-xl px-6 py-4 hover:bg-gray-200 transition-colors text-lg"
+            >
+              ← חזרה
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={!canProceed}
+            className="flex-1 bg-blue-600 text-white font-semibold rounded-xl py-4 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors text-lg"
+          >
+            {isLast ? 'סיום המבדק' : 'שאלה הבאה →'}
+          </button>
+        </div>
       </div>
     </div>
   );
