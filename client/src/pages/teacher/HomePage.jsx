@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SessionCard from '../../components/teacher/SessionCard';
 
@@ -7,6 +7,8 @@ export default function HomePage() {
   const [className, setClassName] = useState('');
   const [creating, setCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const importRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,6 +17,29 @@ export default function HomePage() {
       .then(setSessions)
       .catch(() => {});
   }, []);
+
+  async function handleImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const session = JSON.parse(text);
+      const res = await fetch('/api/sessions/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(session)
+      });
+      if (!res.ok) throw new Error('שגיאה בייבוא');
+      const data = await res.json();
+      navigate(`/teacher/analytics/${data.sessionId}`);
+    } catch {
+      alert('קובץ לא תקין — יש לייבא קובץ JSON שיוצא מהמערכת');
+    } finally {
+      setImporting(false);
+      e.target.value = '';
+    }
+  }
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -36,7 +61,7 @@ export default function HomePage() {
           <h1 className="text-2xl font-black text-gray-900">לוח בקרה — מורה</h1>
           <p className="text-gray-500 text-sm mt-1">ניהול מבדקי השתקפות</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
           <button
             onClick={() => navigate('/teacher/preview')}
             className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-200 transition-colors font-medium"
@@ -49,15 +74,16 @@ export default function HomePage() {
           >
             בנק שאלות
           </button>
+          <input ref={importRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+          <button
+            onClick={() => importRef.current.click()}
+            disabled={importing}
+            className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
+          >
+            {importing ? 'מייבא...' : 'ייבוא מבדק'}
+          </button>
         </div>
       </div>
-
-      {/* Storage warning (production only) */}
-      {import.meta.env.PROD && (
-        <div className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 text-sm text-orange-800 mb-5">
-          💾 הנתונים נשמרים בזיכרון השרת בלבד. <strong>יש לייצא CSV/JSON בסיום כל שיעור</strong> — הנתונים עלולים להימחק עם הפעלה מחדש של השרת.
-        </div>
-      )}
 
       {/* Create new session */}
       <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 mb-6 text-white">

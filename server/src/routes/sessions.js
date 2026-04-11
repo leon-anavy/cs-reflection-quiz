@@ -45,4 +45,28 @@ router.get('/:pin', async (req, res) => {
   }
 });
 
+// Import a full session (including students/answers) — assigns a new PIN
+router.post('/import', async (req, res) => {
+  try {
+    const incoming = req.body;
+    if (!incoming || !Array.isArray(incoming.questions) || !Array.isArray(incoming.students)) {
+      return res.status(400).json({ error: 'Invalid session format' });
+    }
+
+    const pin = await generatePin();
+    const session = {
+      sessionId: pin,
+      createdAt: incoming.createdAt || new Date().toISOString(),
+      className: incoming.className || '',
+      questions: incoming.questions,
+      students: incoming.students
+    };
+
+    await writeSession(pin, session);
+    res.status(201).json({ sessionId: pin });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
