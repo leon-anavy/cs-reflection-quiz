@@ -38,6 +38,11 @@ router.put('/:id', (req, res) => {
   res.json(questions[idx]);
 });
 
+router.delete('/', (req, res) => {
+  writeQuestions([]);
+  res.status(204).end();
+});
+
 router.delete('/:id', (req, res) => {
   const questions = readQuestions();
   const idx = questions.findIndex(q => q.id === req.params.id);

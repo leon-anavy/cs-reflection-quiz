@@ -101,6 +101,12 @@ export default function QuestionBank() {
     setQuestions(qs => qs.filter(q => q.id !== id));
   }
 
+  async function handleDeleteAll() {
+    if (!confirm('למחוק את כל השאלות מהבנק? פעולה זו אינה הפיכה.')) return;
+    await fetch('/api/questions', { method: 'DELETE' });
+    setQuestions([]);
+  }
+
   async function handleAdd(newQ) {
     const res = await fetch('/api/questions', {
       method: 'POST',
@@ -180,6 +186,14 @@ export default function QuestionBank() {
         >
           הורד תבנית
         </button>
+        {questions.length > 0 && (
+          <button
+            onClick={handleDeleteAll}
+            className="bg-red-50 text-red-600 font-medium px-4 py-2 rounded-xl text-sm hover:bg-red-100 border border-red-200"
+          >
+            מחק הכל
+          </button>
+        )}
       </div>
 
       {importError && <p className="text-red-600 text-sm mb-3">{importError}</p>}
