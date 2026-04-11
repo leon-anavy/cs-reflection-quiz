@@ -211,6 +211,50 @@ function StudentAggregations({ students, questions }) {
   );
 }
 
+function QuestionsAttentionSummary({ questions, students }) {
+  const flagged = questions.map((q, idx) => {
+    const answers = students.flatMap(s => s.answers.filter(a => a.questionId === q.id));
+    if (answers.length === 0) return null;
+    const correct = answers.filter(a => a.selectedOptionIndex === q.correctAnswerIndex).length;
+    const accuracy = correct / answers.length;
+    const avgConf = answers.reduce((s, a) => s + a.confidenceLevel, 0) / answers.length;
+    const dominantWrongIdx = [0, 1, 2, 3].find(i => i !== q.correctAnswerIndex && answers.filter(a => a.selectedOptionIndex === i).length / answers.length > 0.4);
+
+    const issues = [
+      avgConf >= 4 && accuracy < 0.5 && 'אמון גבוה, ביצועים נמוכים',
+      avgConf < 4 && accuracy < 0.5 && 'דיוק נמוך',
+      dominantWrongIdx !== null && `טעות נפוצה בתשובה ${['א','ב','ג','ד'][dominantWrongIdx]}`,
+    ].filter(Boolean);
+
+    if (issues.length === 0) return null;
+    return { idx, title: q.title, issues, accuracy: Math.round(accuracy * 100) };
+  }).filter(Boolean);
+
+  if (flagged.length === 0) return (
+    <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700 font-medium text-center">
+      כל השאלות עברו ללא בעיות בולטות
+    </div>
+  );
+
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+      <p className="font-bold text-amber-800 text-sm mb-2">שאלות הדורשות תשומת לב ({flagged.length})</p>
+      <div className="flex flex-col gap-2">
+        {flagged.map(({ idx, title, issues, accuracy }) => (
+          <div key={idx} className="flex items-start gap-3 bg-white rounded-lg px-3 py-2 border border-amber-100">
+            <span className="shrink-0 font-bold text-amber-700 text-sm w-6">{idx + 1}.</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-800 truncate">{title}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{issues.join(' · ')}</p>
+            </div>
+            <span className="shrink-0 text-sm font-bold text-red-600">{accuracy}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Analytics() {
   const { pin } = useParams();
   const navigate = useNavigate();
@@ -292,6 +336,7 @@ export default function Analytics() {
 
           {activeTab === 'questions' && (
             <div className="flex flex-col gap-4">
+              <QuestionsAttentionSummary questions={questions} students={students} />
               {questions.map((q, idx) => (
                 <QuestionStatCard key={q.id} question={q} students={students} index={idx} />
               ))}

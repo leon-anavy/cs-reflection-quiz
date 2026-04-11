@@ -19,18 +19,33 @@ export default function QuestionStatCard({ question, students, index }) {
     answers.filter(a => a.selectedOptionIndex === i).length
   );
 
-  const isRedFlag = avgConfidence >= 4 && accuracy < 0.5 && totalAnswered > 0;
+  const isHighConfLowAcc = avgConfidence >= 4 && accuracy < 0.5 && totalAnswered > 0;
+  const isLowAccuracy = accuracy < 0.5 && totalAnswered > 0;
+  // Dominant wrong answer: a single wrong option captured > 40% of votes
+  const dominantWrongIdx = totalAnswered > 0
+    ? [0, 1, 2, 3].find(i => i !== question.correctAnswerIndex && distribution[i] / totalAnswered > 0.4)
+    : null;
+
+  const flags = [
+    isHighConfLowAcc && { label: 'אמון גבוה, ביצועים נמוכים', color: 'bg-red-100 text-red-700 border-red-300' },
+    !isHighConfLowAcc && isLowAccuracy && { label: 'דיוק נמוך', color: 'bg-orange-100 text-orange-700 border-orange-300' },
+    dominantWrongIdx !== null && { label: `טעות נפוצה: תשובה ${['א','ב','ג','ד'][dominantWrongIdx]}`, color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  ].filter(Boolean);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+    <div className={`bg-white rounded-2xl border shadow-sm p-5 ${flags.length > 0 ? 'border-orange-200' : 'border-gray-200'}`}>
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
           <span className="text-xs text-gray-400 font-medium">שאלה {index + 1}</span>
           <h3 className="font-bold text-gray-900">{question.title}</h3>
         </div>
-        {isRedFlag && (
-          <div className="shrink-0 bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-300">
-            ⚠️ אמון גבוה, ביצועים נמוכים
+        {flags.length > 0 && (
+          <div className="flex flex-col gap-1 items-end shrink-0">
+            {flags.map(f => (
+              <span key={f.label} className={`text-xs font-bold px-3 py-1 rounded-full border ${f.color}`}>
+                ⚠ {f.label}
+              </span>
+            ))}
           </div>
         )}
       </div>

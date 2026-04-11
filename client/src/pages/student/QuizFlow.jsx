@@ -38,7 +38,7 @@ export default function QuizFlow() {
   const question = session.questions[currentIndex];
   const total = session.questions.length;
   const isLast = currentIndex === total - 1;
-  const canProceed = selectedOption !== null && confidence !== null && explanation.trim().length > 0;
+  const canProceed = selectedOption !== null && confidence !== null;
 
   function handleNext() {
     submitAnswer({
@@ -100,7 +100,7 @@ export default function QuizFlow() {
         {/* Explanation */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            הסבר מדוע בחרת בתשובה זו
+            הסבר מדוע בחרת בתשובה זו <span className="text-gray-400 font-normal">(אופציונלי)</span>
           </label>
           <textarea
             value={explanation}
