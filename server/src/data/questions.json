@@ -1,0 +1,50 @@
+[
+  {
+    "id": "q1",
+    "title": "תנאים — בדיקת זוגיות",
+    "codeSnippet": "int x = 7;\nif (x % 2 == 0) {\n    System.out.println(\"זוגי\");\n} else {\n    System.out.println(\"אי-זוגי\");\n}",
+    "questionText": "מה יודפס כאשר x = 7?",
+    "options": ["זוגי", "אי-זוגי", "שגיאת קומפילציה", "כלום"],
+    "correctAnswerIndex": 1
+  },
+  {
+    "id": "q2",
+    "title": "לולאות — סכום טור",
+    "codeSnippet": "int sum = 0;\nfor (int i = 1; i <= 5; i++) {\n    sum += i;\n}\nSystem.out.println(sum);",
+    "questionText": "מה יודפס בסיום הריצה?",
+    "options": ["10", "15", "20", "5"],
+    "correctAnswerIndex": 1
+  },
+  {
+    "id": "q3",
+    "title": "מערכים — גישה לאיבר",
+    "codeSnippet": "int[] arr = {10, 20, 30, 40, 50};\nSystem.out.println(arr[arr.length - 2]);",
+    "questionText": "מה יודפס?",
+    "options": ["30", "40", "50", "20"],
+    "correctAnswerIndex": 1
+  },
+  {
+    "id": "q4",
+    "title": "מתודות — ערך מוחזר",
+    "codeSnippet": "public static int doubleIt(int n) {\n    return n * 2;\n}\nSystem.out.println(doubleIt(6));",
+    "questionText": "מה יודפס?",
+    "options": ["6", "12", "36", "שגיאת קומפילציה"],
+    "correctAnswerIndex": 1
+  },
+  {
+    "id": "q5",
+    "title": "OOP — בנאי ושדות",
+    "codeSnippet": "class Dog {\n    String name;\n    Dog(String n) { this.name = n; }\n}\nDog d = new Dog(\"רקס\");\nSystem.out.println(d.name);",
+    "questionText": "מה יודפס?",
+    "options": ["null", "n", "רקס", "שגיאת ריצה"],
+    "correctAnswerIndex": 2
+  },
+  {
+    "id": "q6",
+    "title": "רקורסיה — עצירת בסיס",
+    "codeSnippet": "public static int fact(int n) {\n    if (n == 0) return 1;\n    return n * fact(n - 1);\n}\nSystem.out.println(fact(4));",
+    "questionText": "מה יודפס?",
+    "options": ["16", "24", "120", "0"],
+    "correctAnswerIndex": 1
+  }
+]

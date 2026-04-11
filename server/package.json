@@ -1,0 +1,28 @@
+{
+  "name": "cs-reflection-quiz-server",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "cors": "2.8.5",
+    "express": "4.21.2",
+    "socket.io": "4.8.1",
+    "uuid": "11.1.0"
+  },
+  "devDependencies": {
+    "jest": "29.7.0",
+    "nodemon": "3.1.9",
+    "supertest": "7.1.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"],
+    "globalSetup": "./tests/globalSetup.js",
+    "globalTeardown": "./tests/globalTeardown.js"
+  }
+}

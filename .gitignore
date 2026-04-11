@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+*.local
+server/src/data/sessions/
+!server/src/data/sessions/.gitkeep
