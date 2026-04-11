@@ -4,3 +4,4 @@ dist/
 *.local
 server/src/data/sessions/
 !server/src/data/sessions/.gitkeep
+questions.json
