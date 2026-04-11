@@ -11,11 +11,11 @@ describe('Questions API', () => {
     fs.copyFileSync(src, dest);
   });
 
-  test('GET /api/questions returns array of 6 default questions', async () => {
+  test('GET /api/questions returns array of 7 default questions', async () => {
     const res = await request(app).get('/api/questions');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBe(6);
+    expect(res.body.length).toBe(7);
   });
 
   test('POST /api/questions adds a single question', async () => {
