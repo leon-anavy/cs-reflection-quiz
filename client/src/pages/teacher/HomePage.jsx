@@ -124,7 +124,7 @@ export default function HomePage() {
       ) : (
         <div className="flex flex-col gap-3">
           {sessions.map(s => (
-            <SessionCard key={s.sessionId} session={s} />
+            <SessionCard key={s.sessionId} session={s} onDelete={id => setSessions(prev => prev.filter(s => s.sessionId !== id))} />
           ))}
         </div>
       )}

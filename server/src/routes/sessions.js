@@ -45,6 +45,18 @@ router.get('/:pin', async (req, res) => {
   }
 });
 
+router.delete('/:pin', async (req, res) => {
+  try {
+    const { getDb } = require('../data/db');
+    const db = await getDb();
+    const result = await db.collection('sessions').deleteOne({ sessionId: req.params.pin.toUpperCase() });
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'Session not found' });
+    res.status(204).end();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Import a full session (including students/answers) — assigns a new PIN
 router.post('/import', async (req, res) => {
   try {
