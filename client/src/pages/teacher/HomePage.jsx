@@ -59,7 +59,7 @@ export default function HomePage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-900">לוח בקרה — מורה</h1>
-          <p className="text-gray-500 text-sm mt-1">ניהול מבדקי השתקפות</p>
+          <p className="text-gray-500 text-sm mt-1">ניהול מבדקי רפלקציה</p>
         </div>
         <div className="flex gap-2 flex-wrap justify-end">
           <button
