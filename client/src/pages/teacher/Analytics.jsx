@@ -218,7 +218,7 @@ function QuestionsAttentionSummary({ questions, students }) {
     const correct = answers.filter(a => a.selectedOptionIndex === q.correctAnswerIndex).length;
     const accuracy = correct / answers.length;
     const avgConf = answers.reduce((s, a) => s + a.confidenceLevel, 0) / answers.length;
-    const dominantWrongIdx = [0, 1, 2, 3].find(i => i !== q.correctAnswerIndex && answers.filter(a => a.selectedOptionIndex === i).length / answers.length > 0.4);
+    const dominantWrongIdx = [0, 1, 2, 3].find(i => i !== q.correctAnswerIndex && answers.filter(a => a.selectedOptionIndex === i).length / answers.length > 0.4) ?? null;
 
     const issues = [
       avgConf >= 4 && accuracy < 0.5 && 'אמון גבוה, ביצועים נמוכים',

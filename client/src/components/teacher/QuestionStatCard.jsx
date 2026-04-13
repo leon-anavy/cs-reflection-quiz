@@ -23,7 +23,7 @@ export default function QuestionStatCard({ question, students, index }) {
   const isLowAccuracy = accuracy < 0.5 && totalAnswered > 0;
   // Dominant wrong answer: a single wrong option captured > 40% of votes
   const dominantWrongIdx = totalAnswered > 0
-    ? [0, 1, 2, 3].find(i => i !== question.correctAnswerIndex && distribution[i] / totalAnswered > 0.4)
+    ? ([0, 1, 2, 3].find(i => i !== question.correctAnswerIndex && distribution[i] / totalAnswered > 0.4) ?? null)
     : null;
 
   const flags = [

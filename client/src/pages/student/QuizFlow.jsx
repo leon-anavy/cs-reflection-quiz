@@ -33,7 +33,7 @@ export default function QuizFlow() {
   }, [currentIndex]);
 
   if (!session || !studentId) return <Navigate to="/join" replace />;
-  if (finished) return <CompletionScreen />;
+  if (finished) return <CompletionScreen session={session} answers={answers} />;
 
   const question = session.questions[currentIndex];
   const total = session.questions.length;

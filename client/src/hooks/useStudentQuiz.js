@@ -11,19 +11,19 @@ export function useStudentQuiz(session, studentId) {
     const socket = getSocket();
     setAnswers(prev => ({ ...prev, [answer.questionId]: answer }));
 
+    const isLast = currentIndex + 1 >= session.questions.length;
     socket.emit('student:answer', {
       pin: session.sessionId,
       studentId,
       answer,
-      questionIndex: currentIndex
+      questionIndex: currentIndex,
+      isLast
     });
 
-    const nextIndex = currentIndex + 1;
-    if (nextIndex >= session.questions.length) {
-      socket.emit('student:finish', { pin: session.sessionId, studentId });
+    if (isLast) {
       setFinished(true);
     } else {
-      setCurrentIndex(nextIndex);
+      setCurrentIndex(currentIndex + 1);
     }
   }, [answers, currentIndex, session, studentId]);
 

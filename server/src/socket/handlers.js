@@ -28,7 +28,7 @@ function registerHandlers(io) {
       io.to(normalizedPin).emit('teacher:roster_update', session.students);
     });
 
-    socket.on('student:answer', async ({ pin, studentId, answer, questionIndex }) => {
+    socket.on('student:answer', async ({ pin, studentId, answer, questionIndex, isLast }) => {
       const normalizedPin = pin.toUpperCase();
       const session = await readSession(normalizedPin);
       if (!session) return;
@@ -48,6 +48,8 @@ function registerHandlers(io) {
         student.currentQuestionIndex,
         Math.min(nextIndex, session.questions.length)
       );
+
+      if (isLast) student.finished = true;
 
       await writeSession(normalizedPin, session);
       io.to(normalizedPin).emit('teacher:roster_update', session.students);

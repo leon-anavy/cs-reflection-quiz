@@ -67,7 +67,15 @@ export default function LiveMonitor() {
           <p className="text-center text-gray-400 py-10">ממתין להצטרפות תלמידים...</p>
         ) : (
           students.map(s => (
-            <StudentRow key={s.studentId} student={s} totalQuestions={totalQuestions} />
+            <StudentRow
+              key={s.studentId}
+              student={s}
+              totalQuestions={totalQuestions}
+              onDelete={async (studentId) => {
+                await fetch(`/api/sessions/${pin}/students/${studentId}`, { method: 'DELETE' });
+                setStudents(prev => prev.filter(s => s.studentId !== studentId));
+              }}
+            />
           ))
         )}
       </div>

@@ -45,6 +45,22 @@ router.get('/:pin', async (req, res) => {
   }
 });
 
+router.delete('/:pin/students/:studentId', async (req, res) => {
+  try {
+    const session = await readSession(req.params.pin.toUpperCase());
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+
+    const before = session.students.length;
+    session.students = session.students.filter(s => s.studentId !== req.params.studentId);
+    if (session.students.length === before) return res.status(404).json({ error: 'Student not found' });
+
+    await writeSession(req.params.pin.toUpperCase(), session);
+    res.status(204).end();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.delete('/:pin', async (req, res) => {
   try {
     const { getDb } = require('../data/db');
