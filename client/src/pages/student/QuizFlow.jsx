@@ -14,7 +14,7 @@ export default function QuizFlow() {
   const [confidence, setConfidence] = useState(null);
   const [explanation, setExplanation] = useState('');
 
-  const { currentIndex, finished, submitAnswer, goBack, getAnswer } = useStudentQuiz(session, studentId);
+  const { currentIndex, answers, finished, submitAnswer, goBack, getAnswer } = useStudentQuiz(session, studentId);
 
   // Pre-fill form when navigating to a question that was already answered
   useEffect(() => {
